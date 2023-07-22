@@ -1,43 +1,52 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const Date = require(__dirname + "/date.js")
 
 const app = express();
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static("public"))
+
+const items=[];
+const workItems=[];
+// why array should be a constant?
+// basically its depends on language. in javascript assigning the value is called variable. updating the array still be a constant
+// because we dont change the value of exist array. we only add new value.
 
 app.get("/", function (req, res) {
-  var today = new Date();
-  var currentDay = today.getDay();
-  var day = " ";
-
-  switch (currentDay) {
-    case 0:
-      day = "sunday";
-      break;
-    case 1:
-      day = "monday";
-      break;
-    case 2:
-      day = "tuesday";
-      break;
-    case 3:
-      day = "wednesday";
-      break;
-    case 4:
-      day = "thursday";
-      break;
-    case 5:
-      day = "friday";
-      break;
-    case 6:
-      day = "saturday";
-      break;
-    default:
-      console.log("Erroe: current day is equal to: " + currentDay);
-  }
-
-  res.render("list", { kindOfDay: day });
+  
+  const day = Date.getDate();
+  res.render("list", {nameOfList : day , newListItem : items});
 });
 
-app.listen(3000, function () {
+app.post("/", function(req,res){
+
+  let item = req.body.newItem;
+  if(req.body.list === "Work List"){
+    workItems.push(item);
+    res.redirect("/work");
+  }
+  else{
+    items.push(item);
+    res.redirect("/");
+  }
+  
+})
+
+app.get("/work", function(req,res){
+  
+  res.render("list", {nameOfList: "Work List", newListItem : workItems});
+
+})
+app.post("/work", function(req,res){
+  const item = req.body.newItem;
+  workItems.push(item);
+  res.redirect("/work")
+})
+
+app.get("/about", function(req,res){
+  res.render("contact")
+})
+app.listen(3001, function () {
   console.log("server started on port 3000");
 });
